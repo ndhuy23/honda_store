@@ -4,12 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Orders.Data.Dto
+namespace Products.Data.Dto
 {
-    public class CreateOrderDto
+    public class CheckProductQuantity
     {
-        public Guid CustomerId { get; set; }
-
         public List<ProductDetail> Products { get; set; }
     }
 }

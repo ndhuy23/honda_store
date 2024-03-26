@@ -18,6 +18,8 @@ namespace ProductService.Data.Entities
 
         public int Quantity { get; set; }
 
+        public long Price {  get; set; }
+
         public List<string> Images { get; set; }
 
     }

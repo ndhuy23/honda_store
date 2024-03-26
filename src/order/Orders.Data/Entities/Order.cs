@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Orders.Data.Entities
 {
-    public class Order
+    public class Order : Base
     {
         public Guid Id { get; set; }
 
@@ -14,15 +14,12 @@ namespace Orders.Data.Entities
 
         public Guid UserId { get; set; }
 
-        public DateTime CreatedAt { get; set; }
-
         public bool IsPayment { get; set; }
 
         public Status Status {  get; set; } 
 
         public DateTime ExpectDeliveryDate { get; set;}
 
-        public DateTime UpdateAt { get; set; }
-
+        public long Total { get; set; }
     }
 }

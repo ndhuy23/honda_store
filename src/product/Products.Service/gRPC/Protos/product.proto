@@ -1,0 +1,19 @@
+﻿syntax = "proto3";
+
+package Products.Service.gRPC.Protos;
+
+service ProductServicegRPC {
+	rpc CheckQuantityProduct (CheckQuantityProductRequest) returns (CheckQuantityProductResponse);
+}
+
+message CheckQuantityProductRequest{
+	repeated ProductProtos ListProduct = 1;
+}
+message CheckQuantityProductResponse{
+	bool isCheck = 1;
+}
+message ProductProtos{
+	string ProductId = 1;
+	string ColorId = 2;
+	int32 Quantity = 3;
+}

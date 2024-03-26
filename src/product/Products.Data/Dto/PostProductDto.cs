@@ -11,9 +11,7 @@ namespace ProductService.Data.Dto
 
         public Guid CompanyId { get; set; }
 
-        public Dictionary<Guid,int> ColorQuantity { get; set; }
-
-        public Dictionary<Guid, List<string>> ColorImages { get; set; }
+        public List<Types> ProductTypes { get; set; }
 
         public List<Feature> Features { get; set; }
 
@@ -22,5 +20,7 @@ namespace ProductService.Data.Dto
         public List<Preferential> Preferentials { get; set; }
 
         public List<Preferential> ExtendPreferentials { get; set; }
+
+        public string Avarta {  get; set; }
     }
 }

@@ -1,10 +1,14 @@
 ﻿using AutoMapper;
 using MongoDB.Driver;
+using MongoDB.Driver.Linq;
+using Products.Data.Dto;
+using Products.Service.GRPC.Protos;
 using ProductService.Data.DataAccess;
 using ProductService.Data.Dto;
 using ProductService.Data.Entities;
 using ProductService.Data.Template;
 using ProductService.Utils;
+using System.Collections;
 
 namespace Products.Services.Core
 {
@@ -14,6 +18,7 @@ namespace Products.Services.Core
         public ResultModel GetProductByCategory(GetProductByCategoryDto categoryDto);
 
         public Task<ResultModel> GetById(Guid id);
+        Task<bool> CheckProductQuantityAsync(List<ProductDetail> products);
     }
     public class ProductServices : IProductService
     {
@@ -52,21 +57,28 @@ namespace Products.Services.Core
             try
             {
                 Product productNew = _mapper.Map<Product>(product);
+                
                 _db.Product.InsertOneAsync(productNew);
-                for (int i = 0; i < productNew.ColorIds.Count(); i++)
+                var minPrice = product.ProductTypes[1].Price;
+                for (int i = 0; i < product.ProductTypes.Count(); i++)
                 {
-                    List<string> images = product.ColorImages[productNew.ColorIds[i]];
-                    Guid colorId = productNew.ColorIds[i];
+                    productNew.ColorIds.Add(product.ProductTypes[i].Color);
                     Storage storage = new Storage();
                     _db.Storage.InsertOneAsync(new Storage()
                     {
-                        ColorId = productNew.ColorIds[i],
+                        ColorId = product.ProductTypes[i].Color,
                         ProductId = productNew.Id,
-                        Images = product.ColorImages[colorId],
-                        Quantity = product.ColorQuantity[colorId]
+                        Images = product.ProductTypes[i].Images,
+                        Quantity = product.ProductTypes[i].Quantity,
+                        Price = product.ProductTypes[i].Price
                     });
+                    if (product.ProductTypes[i].Price < minPrice) minPrice = product.ProductTypes[i].Price;
                 }
-
+                var update = Builders<Product>.Update.Set(p => p.ColorIds, productNew.ColorIds)
+                                                     .Set(p => p.Price, minPrice);
+                var filter = Builders<Product>.Filter.Eq(p => p.Id, productNew.Id);
+                
+                _db.Product.UpdateOne(filter, update);
                 _result.IsSuccess = true;
                 _result.Message = "Post Product Successful";
             }
@@ -96,5 +108,19 @@ namespace Products.Services.Core
             return _result;
         }
 
+        public async Task<bool> CheckProductQuantityAsync(List<ProductDetail> products)
+        {
+            for (int i = 0; i < products.Count; i++)
+            {
+                var productStorage = await _db.Storage.AsQueryable()
+                                                        .Where(p => p.ProductId == products[i].ProductId)
+                                                        .FirstOrDefaultAsync();
+                if (productStorage == null ||
+                    productStorage.Quantity < products[i].Quantity) return false;
+            }
+            
+            return true;
+        }
+        
     }
 }

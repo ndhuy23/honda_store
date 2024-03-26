@@ -21,19 +21,19 @@ namespace ProductService.Data.Entities
         [BsonRepresentation(BsonType.String)]
         public Guid CompanyId {  get; set; }
 
-        public List<Guid> ColorIds { get; set; }
+        public List<Guid> ColorIds { get; set; } = new List<Guid>();
         
         public long Price { get; set; }
 
         public string Avatar { get; set; }
 
-        public List<Feature> Features { get; set; }
+        public List<Feature> Features { get; set; } = new List<Feature>();
 
-        public List<Detail> Details { get; set; }
+        public List<Detail> Details { get; set; } = new List<Detail>();
 
-        public List<Preferential> Preferentials { get; set; }
+        public List<Preferential> Preferentials { get; set; } = new List<Preferential>();
 
-        public List<Preferential> ExtendPreferentials { get; set; }
+        public List<Preferential> ExtendPreferentials { get; set; } = new List<Preferential>();
 
         
     }

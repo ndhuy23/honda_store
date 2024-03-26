@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Orders.Data.Entities;
 using System;
 using System.Collections.Generic;
@@ -8,9 +9,11 @@ using System.Threading.Tasks;
 
 namespace Orders.Data.DataAccess
 {
-    public class OrderDbContext : DbContext 
+    public class OrderDbContext : DbContext
     {
+        public DbSet<Order> Orders { get; set; }
 
+        public DbSet<OrderDetail> OrderDetails { get; set; }
         public OrderDbContext(DbContextOptions<OrderDbContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -22,9 +25,29 @@ namespace Orders.Data.DataAccess
 
             base.OnModelCreating(modelBuilder);
         }
-        DbSet<Order> Orders { get; set; }
+        
+        public override int SaveChanges()
+        {
+            AddTimestamps();
+            return base.SaveChanges();
+        }
 
-        DbSet<OrderDetail> OrderDetails { get; set; }
+        private void AddTimestamps()
+        {
+            var entities = ChangeTracker.Entries()
+                .Where(x => x.Entity is Base && (x.State == EntityState.Added || x.State == EntityState.Modified));
 
+            foreach (var entity in entities)
+            {
+                var now = DateTime.UtcNow; // current datetime
+
+                if (entity.State == EntityState.Added)
+                {
+                    ((Base)entity.Entity).CreatedAt = now;
+                }
+                ((Base)entity.Entity).UpdatedAt = now;
+            }
+        }
+        
     }
 }

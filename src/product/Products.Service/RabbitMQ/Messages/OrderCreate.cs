@@ -1,15 +1,14 @@
-﻿using System;
+﻿using Products.Data.Dto;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Orders.Data.Dto
+namespace Orders.Service.RabbitMQ.Messages
 {
-    public class CreateOrderDto
+    public class OrderCreate
     {
-        public Guid CustomerId { get; set; }
-
         public List<ProductDetail> Products { get; set; }
     }
 }
