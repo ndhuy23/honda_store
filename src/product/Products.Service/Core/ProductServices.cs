@@ -19,6 +19,8 @@ namespace Products.Services.Core
 
         public Task<ResultModel> GetById(Guid id);
         Task<bool> CheckProductQuantityAsync(List<ProductDetail> products);
+
+        public Task<ResultModel> Get(int pageIndex, int pageSize);
     }
     public class ProductServices : IProductService
     {
@@ -107,7 +109,6 @@ namespace Products.Services.Core
             }
             return _result;
         }
-
         public async Task<bool> CheckProductQuantityAsync(List<ProductDetail> products)
         {
             for (int i = 0; i < products.Count; i++)
@@ -121,6 +122,21 @@ namespace Products.Services.Core
             
             return true;
         }
-        
+
+        public async Task<ResultModel> Get(int pageIndex, int pageSize)
+        {
+            try
+            {
+                _result.Data = _db.Product.AsQueryable().Skip((pageIndex - 1) * pageSize)
+                                                        .Take(pageSize);
+                _result.IsSuccess = true;
+                _result.Message = "";
+            }catch(Exception e)
+            {
+                _result.IsSuccess = false;
+                _result.Message = "";
+            }
+            return _result;
+        }
     }
 }

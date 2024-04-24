@@ -10,13 +10,15 @@ using Users.Data.Constant;
 using Users.Data.DataAccess;
 using Users.Data.Entities;
 using Users.Data.Response;
+using Users.Data.ViewModels.Dtos;
+using Users.Data.ViewModels.Response;
 
 namespace Users.Service.Core
 {
     public interface IUserService
     {
-        Task<ResultModel> LoginAccount(string userName, string password);
-        Task<ResultModel> RegisterAccount(string UserName, string Password, string FullName);
+        Task<ResultModel> LoginAccount(LoginUserDto user);
+        Task<ResultModel> RegisterAccount(RegisterUserDto user);
     }
     public class UsersService : IUserService
     {
@@ -28,14 +30,24 @@ namespace Users.Service.Core
             _result = new ResultModel();
         }
 
-        public async Task<ResultModel> LoginAccount(string userName, string password)
+        public async Task<ResultModel> LoginAccount(LoginUserDto user)
         {
             try
             {
-                var customer = await _db.Users.FirstAsync(u => u.UserName == userName && u.Password == password);
-                _result.Data = customer;
+                var customer = await _db.Users.FirstAsync(u => u.UserName == user.UserName 
+                                                            && u.Password == user.Password);
+                if(customer == null)
+                {
+                    _result.IsSuccess = false;
+                    _result.Message = "User name or password is incorrect";
+                    return _result;
+                }
+                _result.Data = new UserResponse()
+                {
+                    FullName = customer.FullName,
+                    UserId = customer.id
+                };
                 _result.IsSuccess = true;
-
 
             }
             catch (Exception e)
@@ -46,7 +58,7 @@ namespace Users.Service.Core
             return _result;
         }
 
-        public async Task<ResultModel> RegisterAccount(string UserName, string Password, string FullName)
+        public async Task<ResultModel> RegisterAccount(RegisterUserDto user)
         {
             using (var transaction = _db.Database.BeginTransaction())
             {
@@ -54,9 +66,9 @@ namespace Users.Service.Core
                 {
                     _db.AddAsync(new User()
                     {
-                        UserName = UserName,
-                        Password = Password,
-                        FullName = FullName,
+                        UserName = user.UserName,
+                        Password = user.Password,
+                        FullName = user.FullName,
                         Active = 0,
                         Role = Role.Customer
                     }); 

@@ -17,7 +17,7 @@ builder.Services.AddMassTransit(x =>
     {
         cfg.Host("localhost", "/", h =>
         {
-            h.Username("ndhuy23");
+            h.Username("productService");
             h.Password("<123456Aa.>");
         });
         cfg.ReceiveEndpoint("product", ep =>

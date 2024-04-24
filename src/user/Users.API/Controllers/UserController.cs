@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Users.Data.Response;
+using Users.Data.ViewModels.Dtos;
 using Users.Service.Core;
 
 namespace Users.API.Controllers
@@ -19,9 +20,9 @@ namespace Users.API.Controllers
         }
         [HttpPost]
         [Route("/register")]
-        public async Task<IActionResult> RegisterAccount(string UserName, string Password, string FullName)
+        public async Task<IActionResult> RegisterAccount(RegisterUserDto user)
         {
-            _result = await _userService.RegisterAccount(UserName, Password, FullName);
+            _result = await _userService.RegisterAccount(user);
             if (!_result.IsSuccess)
             {
                 return BadRequest(_result);
@@ -30,9 +31,9 @@ namespace Users.API.Controllers
         }
         [HttpPost]
         [Route("/login")]
-        public async Task<IActionResult> LoginAccount(string UserName, string Password)
+        public async Task<IActionResult> LoginAccount(LoginUserDto user)
         {
-            _result = await _userService.LoginAccount(UserName, Password);
+            _result = await _userService.LoginAccount(user);
             if (!_result.IsSuccess)
             {
                 return BadRequest(_result);

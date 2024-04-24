@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Orders.Data.DataAccess;
 using Orders.Data.Dto;
+using Orders.Data.Dto.Response;
 using Orders.Data.Entities;
 using Orders.Data.Response;
 using Orders.Service.gRPC;
@@ -21,6 +22,7 @@ namespace Orders.Service.Core
 {
     public interface IOrderService
     {
+        Task<ResultModel> ChangeStatusFromPayment(Guid orderId);
         Task<ResultModel> CreateOrder(CreateOrderDto order);
     }
     public class OrderService : IOrderService 
@@ -37,6 +39,29 @@ namespace Orders.Service.Core
             _mapper = mapper;
             _db = db;
             _orderCreateProducer = order;
+        }
+
+
+        public async Task<ResultModel> ChangeStatusFromPayment(Guid orderId)
+        {
+            using(var transaction = _db.Database.BeginTransaction())
+            {
+                try
+                {
+                    var order = _db.Orders.Where(od => od.Id == orderId).FirstOrDefault();
+                    order.Status = Status.LoadAccept;
+                    _result.IsSuccess = true;
+                    _db.SaveChanges();
+                    transaction.Commit();
+                }catch(Exception e)
+                {
+                    transaction.Rollback();
+                    _result.IsSuccess = false;
+                    _result.Message = e.Message;
+                }
+
+            }
+            return _result;
         }
 
         public async Task<ResultModel> CreateOrder(CreateOrderDto order)
@@ -88,7 +113,6 @@ namespace Orders.Service.Core
                                 ColorId = product.ColorId,
                                 OrderId = orderNew.Id,
                                 ProductId = product.ProductId,
-                                
                             };
                             total += product.Price;
                             listProductDetail.Add(product);
@@ -96,6 +120,11 @@ namespace Orders.Service.Core
                         }
                         orderNew.Total = total;
                         _db.SaveChanges();
+                        _result.Data = new OrderResponse() { 
+                            UserId = order.CustomerId,
+                            OrderId = orderNew.Id,
+                            Amount = total
+                        };
                         _result.IsSuccess = true;
                         _result.Message = "Order created";
                         transaction.Commit();
@@ -105,7 +134,6 @@ namespace Orders.Service.Core
                     {
                         Products = listProductDetail
                     });
-                    return _result;
                 }
                 catch (Exception e)
                 {

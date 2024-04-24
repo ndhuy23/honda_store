@@ -4,8 +4,10 @@ using Microsoft.EntityFrameworkCore;
 using Orders.Data.DataAccess;
 using Orders.Service.Core;
 using Orders.Service.gRPC;
+using Orders.Service.RabbitMQ.Consumers;
 using Orders.Service.RabbitMQ.Messages;
 using Orders.Service.RabbitMQ.Producers;
+using Products.Service.RabbitMQ.Consumer;
 using ProductService.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,24 +29,30 @@ builder.Services.AddDbContext<OrderDbContext>(option => {
 });
 builder.Services.AddMassTransit(x =>
 {
+    x.AddConsumer<PaymentSubmitedConsumer>();
     x.UsingRabbitMq((context, cfg) =>
     {
         cfg.Host("localhost", "/", h =>
         {
-            h.Username("orderservice");
+            h.Username("orderService");
             h.Password("<123456Aa.>");
         });
+        cfg.ReceiveEndpoint("order", ep =>
+        {
+            ep.ConfigureConsumer<PaymentSubmitedConsumer>(context);
+        });
         cfg.ConfigureEndpoints(context);
+        
         cfg.Publish<OrderCreateProducer>(x =>
         {
 
             x.ExchangeType = "fanout"; // default, allows any valid exchange type
         });
     });
+    
 });
 builder.Services.AddScoped<OrderCreateProducer>();
 var app = builder.Build();
-
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

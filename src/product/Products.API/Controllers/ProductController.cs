@@ -47,5 +47,15 @@ namespace ProductService.Controllers
             }
             return Ok(_result);
         }
+        [HttpGet]
+        public async Task<IActionResult> Get(int pageIndex, int pageSize)
+        {
+            _result = await _productService.Get(pageIndex, pageSize);
+            if (!_result.IsSuccess)
+            {
+                return BadRequest(_result);
+            }
+            return Ok(_result);
+        }
     }
 }
