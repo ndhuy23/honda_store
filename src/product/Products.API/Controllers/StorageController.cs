@@ -16,7 +16,7 @@ namespace ProductService.Controllers
             _storageService = storageService;
             _result = new ResultModel();
         }
-        [HttpGet("{ProductId},{ColorId}")]
+        [HttpGet("{ProductId}/colors/{ColorId}")]
         public async Task<IActionResult> GetByProductIdAndColorId(Guid ProductId, Guid ColorId)
         {
             _result = await _storageService.GetByProductIdAndColorId(ProductId, ColorId);
@@ -26,10 +26,10 @@ namespace ProductService.Controllers
             }
             return Ok(_result);
         }
-        [HttpGet("{ProductId}")]
-        public async Task<IActionResult> GetByProductId(Guid ProductId)
+        [HttpGet("{productId}")]
+        public async Task<IActionResult> GetByProductId(Guid productId)
         {
-            _result = await _storageService.GetByProductId(ProductId);
+            _result = await _storageService.GetByProductId(productId);
             if (!_result.IsSuccess)
             {
                 return BadRequest(_result);

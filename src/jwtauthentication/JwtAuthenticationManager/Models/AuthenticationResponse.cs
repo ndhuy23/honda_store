@@ -4,11 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Users.Data.Entities
+namespace JwtAuthenticationManager.Models
 {
-    public enum Role
+    publci class AuthenticationResponse
     {
-        Customer,
-        Administrator
     }
 }

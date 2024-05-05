@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Users.Data.DataAccess;
+using Users.Service.Authentication;
 using Users.Service.Core;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -48,7 +49,7 @@ builder.Services.AddDbContext<UserDbContext>(option => {
     option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 builder.Services.AddTransient<IUserService, UsersService>();
-
+builder.Services.AddTransient<JwtTokenHandler>();
 var app = builder.Build();
 app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 

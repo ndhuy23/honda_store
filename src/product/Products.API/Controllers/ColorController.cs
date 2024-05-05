@@ -16,7 +16,7 @@ namespace ProductService.Controllers
             _colorService = colorService;
             _result = new ResultModel();
         }
-        [HttpPost("{name},{image}")]
+        [HttpPost]
         public async Task<IActionResult> Post(string name, string image)
         {
             _result = await _colorService.Post(name, image);
@@ -26,7 +26,7 @@ namespace ProductService.Controllers
             }
             return Ok(_result);
         }
-        [HttpPost]
+        [HttpPost("ids")]
         public async Task<IActionResult> GetByIds(List<Guid> ids)
         {
             _result = await _colorService.GetByIds(ids);

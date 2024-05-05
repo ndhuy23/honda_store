@@ -1,0 +1,6 @@
+@HondaStoreApiGateway_HostAddress = http://localhost:5079
+
+GET {{HondaStoreApiGateway_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

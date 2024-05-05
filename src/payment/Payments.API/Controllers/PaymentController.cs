@@ -54,8 +54,7 @@ namespace Payments.API.Controllers
             }
             return _result;
         }
-        [HttpPost]
-        [Route("change")]
+        [HttpPut]
         public async Task<ResultModel> ChangeStatusOrder(Guid orderId)
         {
             try

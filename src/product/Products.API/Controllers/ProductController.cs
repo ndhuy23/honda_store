@@ -17,9 +17,7 @@ namespace ProductService.Controllers
             _productService = productService;
             _result = new ResultModel();
         }
-        [HttpPost]
-        [Route("/getByCategory")]
-
+        [HttpPost("category")]
         public async Task<IActionResult> GetByCategory(GetProductByCategoryDto getProductDto)
         {
             _result = _productService.GetProductByCategory(getProductDto);

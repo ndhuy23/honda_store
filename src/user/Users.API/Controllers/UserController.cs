@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Users.Data.Response;
 using Users.Data.ViewModels.Dtos;
+using Users.Data.ViewModels.Response;
+using Users.Service.Authentication;
 using Users.Service.Core;
 
 namespace Users.API.Controllers
@@ -13,10 +15,12 @@ namespace Users.API.Controllers
     {
         public IUserService _userService;
         public ResultModel _result;
-        public UserController(IUserService userService)
+        private readonly JwtTokenHandler _jwtTokenHandler;
+        public UserController(IUserService userService, JwtTokenHandler jwtTokenHandler)
         {
             _userService = userService;
             _result = new ResultModel();
+            _jwtTokenHandler = jwtTokenHandler;
         }
         [HttpPost]
         [Route("/register")]
@@ -40,12 +44,15 @@ namespace Users.API.Controllers
             }
             return Ok(_result);
         }
-        [HttpGet]
-        public string Test()
+
+        [HttpPost]
+        public ActionResult<AuthenticationResponse?> Authenticate([FromBody] AuthenticationRequest request)
         {
-            _result.Data = "Test";
-            _result.Message = " haha";
-            return "haha";
+            var authenticationResponse = _jwtTokenHandler.GenerateJwtToken(request);
+            if(authenticationResponse == null) return Unauthorized();
+
+            return authenticationResponse;
         }
+
     }
 }
