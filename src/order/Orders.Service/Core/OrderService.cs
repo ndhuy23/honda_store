@@ -24,6 +24,7 @@ namespace Orders.Service.Core
     {
         Task<ResultModel> ChangeStatusFromPayment(Guid orderId);
         Task<ResultModel> CreateOrder(CreateOrderDto order);
+        Task<ResultModel> GetByUserId(Guid userId); 
     }
     public class OrderService : IOrderService 
     {
@@ -102,7 +103,8 @@ namespace Orders.Service.Core
                             UserId = order.CustomerId,
                             Status = Status.LoadPayment,
                             IsPayment = false,
-                            Total = 0
+                            Total = 0,
+                            OrderDetails = new List<OrderDetail>()
                         };
 
                         _db.Orders.Add(orderNew);
@@ -114,6 +116,7 @@ namespace Orders.Service.Core
                                 OrderId = orderNew.Id,
                                 ProductId = product.ProductId,
                             };
+                            orderNew.OrderDetails.Add(orderDetail);
                             total += product.Price;
                             listProductDetail.Add(product);
                             _db.OrderDetails.Add(orderDetail);
@@ -143,6 +146,32 @@ namespace Orders.Service.Core
                 }
             }
             
+            return _result;
+        }
+
+        public async Task<ResultModel> GetByUserId(Guid userId)
+        {
+            try
+            {
+                var listOrder = _db.Orders.Where(od => od.UserId == userId).ToList();
+                
+                listOrder.ForEach(order =>
+                {
+                    var orderDetail = _db.OrderDetails.Where(od => od.OrderId == order.Id)
+                                                      .Select(od => new OrderDetail { ColorId = od.ColorId,
+                                                                                      ProductId = od.ProductId})
+                                                      .ToList();
+                    order.OrderDetails = orderDetail;
+                });
+                _result.Data = listOrder;
+                _result.IsSuccess = true;
+                _result.Message = "";
+            }
+            catch(Exception e)
+            {
+                _result.IsSuccess = false;
+                _result.Message = e.Message;
+            }
             return _result;
         }
     }

@@ -43,9 +43,7 @@ namespace Payments.API.Controllers
             {
                 var paymentFactory = new PaymentMethodFactory(_serviceProvider);
                 var service = paymentFactory.getPaymentType(createPaymentDto.PaymentType);
-                _result.Data = await service.CreatePaymentAsync(createPaymentDto);
-                _result.IsSuccess = true;
-                _result.Message = "Create payment successful";
+                _result = await service.CreatePaymentAsync(createPaymentDto);
             }
             catch(Exception e)
             {

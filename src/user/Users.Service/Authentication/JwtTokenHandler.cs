@@ -59,11 +59,13 @@ namespace Users.Service.Authentication
 
             return new AuthenticationResponse
             {
+                UserId = userAccount.id,
+                FullName = userAccount.FullName,
                 UserName = userAccount.UserName,
                 ExpiresIn = (int)tokenExpiryTimeStamp.Subtract(DateTime.Now).TotalSeconds,
                 JwtToken = token
             };
-                        
+            
             
 
         }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Orders.Data.Dto;
+using Orders.Data.Entities;
 using Orders.Data.Response;
 using Orders.Service.Core;
 
@@ -30,9 +31,14 @@ namespace Orders.API.Controllers
             }
             return Ok(_result);
         }
-        [HttpGet]
-        public async Task<IActionResult> Get(Guid Id)
+        [HttpGet("users/{userId}")]
+        public async Task<IActionResult> Get(Guid userId)
         {
+            _result = await _orderService.GetByUserId(userId);
+            if (!_result.IsSuccess)
+            {
+                return BadRequest(_result);
+            }
             return Ok(_result);
         }
         

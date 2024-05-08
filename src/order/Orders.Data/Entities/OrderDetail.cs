@@ -20,7 +20,5 @@ namespace Orders.Data.Entities
         public Guid ProductId {  get; set; }
 
         
-        
-        
     }
 }

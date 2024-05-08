@@ -171,7 +171,7 @@
       ],
       "DownstreamPathTemplate": "/api/Storage/{url}"
     },
-
+    
     {
       "UpstreamPathTemplate": "/api/User",
       "UpstreamHttpMethod": [ "Post" ],
@@ -204,8 +204,9 @@
         "Role": [ "Customer", "Administrator" ]
       }
     },
+    
     {
-      "UpstreamPathTemplate": "/api/Order",
+      "UpstreamPathTemplate": "/api/Order/{newurl}",
       "UpstreamHttpMethod": [ "Get" ],
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
@@ -214,7 +215,14 @@
           "Port": 7166
         }
       ],
-      "DownstreamPathTemplate": "/api/Order"
+      "DownstreamPathTemplate": "/api/Order/{newurl}",
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "Role": [ "Customer", "Administrator" ]
+      }
     },
     {
       "UpstreamPathTemplate": "/api/Payment",
