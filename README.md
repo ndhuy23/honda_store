@@ -1,5 +1,5 @@
-Kiến trúc: Microservice
+Architecture: Microservices
 
-Công nghệ: Json Web Token (JWT), .NET, MSSQL, MongoDB, Masstransit, RabbitMQ, gRPC,..
+Technologies: Json Web Token (JWT), .NET, MSSQL, MongoDB, Masstransit, RabbitMQ, gRPC,..
 
-Mô tả: Honda Store là một trang web bán xe sử dụng kiến trúc microservice. Sử dụng RabbitMQ để làm Event bus liên lạc giữa các service và sử dụng gRPC để thực hiện các request-response giữa các service cần thực hiện điều đó. Sử dụng Ocelot kết hợp với User Service để thực hiện xác thực và phân quyền ngay tại API Gateway. Dự án có khả năng mở rộng trong tương lai.
+Description: The Honda Store project adopts microservice architecture. I use MassTransit in conjunction with RabbitMQ for inter-service communication and ensure optimal database performance. I utilize gRPC for communication between the Product Service and Order Service to check product quantity of product in Product Service. JWT is utilized for authentication and authorization in API Gateway with Ocelot in conjunction with User Service. 
