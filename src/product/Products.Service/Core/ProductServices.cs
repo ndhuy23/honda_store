@@ -1,6 +1,9 @@
 ﻿using AutoMapper;
+using MassTransit.Internals.Caching;
+using Microsoft.Extensions.Caching.Distributed;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
+using Newtonsoft.Json;
 using Products.Data.Dto;
 using Products.Service.GRPC.Protos;
 using ProductService.Data.DataAccess;
@@ -24,26 +27,43 @@ namespace Products.Services.Core
     }
     public class ProductServices : IProductService
     {
+        private readonly IDistributedCache _cache;
         readonly ProductDbContext _db;
         public ResultModel _result;
         readonly IMapper _mapper;
 
-        public ProductServices(ProductDbContext db, IMapper mapper)
+        public ProductServices(ProductDbContext db, IMapper mapper, IDistributedCache cache)
         {
             _db = db;
             _result = new ResultModel();
             _mapper = mapper;
+            _cache = cache;
         }
         public ResultModel GetProductByCategory(GetProductByCategoryDto categoryDto)
         {
             try
             {
-                int offset = (categoryDto.Page - 1) * categoryDto.PageSize;
-                Category category = _db.Category.Find(c => c.Name == categoryDto.CategoryName).First();
-                _result.Data = _db.Product.Find(p => p.CategoryId == category.Id)
-                                            .Skip(offset)
-                                            .Limit(categoryDto.PageSize)
-                                            .ToList();
+                string cachedData = _cache.GetString($"{categoryDto.CategoryName}_{categoryDto.Page}_{categoryDto.PageSize}");
+                if (string.IsNullOrEmpty(cachedData))
+                {
+                    var cacheOptions = new DistributedCacheEntryOptions
+                    {
+                        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5) // Thời gian sống của cache là 5 phút
+                    };
+
+                    int offset = (categoryDto.Page - 1) * categoryDto.PageSize;
+                    Category category = _db.Category.Find(c => c.Name == categoryDto.CategoryName).First();
+                    _result.Data = _db.Product.Find(p => p.CategoryId == category.Id)
+                                                .Skip(offset)
+                                                .Limit(categoryDto.PageSize)
+                                                .ToList();
+                    _cache.SetString(categoryDto.CategoryName, JsonConvert.SerializeObject(_result.Data), cacheOptions);
+                }
+                else
+                {
+                    _result.Data = JsonConvert.DeserializeObject<List<Product>>(cachedData);
+                }
+                
 
                 _result.IsSuccess = true;
             }
@@ -96,9 +116,25 @@ namespace Products.Services.Core
         {
             try
             {
-                var filter = Builders<Product>.Filter.Eq(p => p.Id, id);
-                var product = _db.Product.AsQueryable().First(p => p.Id == id);
-                _result.Data = product;
+                string cachedData = _cache.GetString($"Product_{id}");
+                if (string.IsNullOrEmpty(cachedData))
+                {
+                    var cacheOptions = new DistributedCacheEntryOptions
+                    {
+                        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5) // Thời gian sống của cache là 5 phút
+                    };
+                    var filter = Builders<Product>.Filter.Eq(p => p.Id, id);
+                    var product = _db.Product.AsQueryable().First(p => p.Id == id);
+                    _result.Data = product;
+                    _cache.SetString($"Product_{id}", JsonConvert.SerializeObject(_result.Data), cacheOptions);
+
+                }
+                
+                else
+                {
+                    _result.Data = JsonConvert.DeserializeObject<Product>(cachedData);
+                }
+                    
                 _result.IsSuccess = true;
                 _result.Message = "Get Product Successful";
             }
@@ -127,8 +163,23 @@ namespace Products.Services.Core
         {
             try
             {
-                _result.Data = _db.Product.AsQueryable().Skip((pageIndex - 1) * pageSize)
+                string cachedData = _cache.GetString($"Product_{pageIndex}_{pageSize}");
+                if (string.IsNullOrEmpty(cachedData))
+                {
+                    var cacheOptions = new DistributedCacheEntryOptions
+                    {
+                        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5) // Thời gian sống của cache là 5 phút
+                    };
+                    _result.Data = _db.Product.AsQueryable().Skip((pageIndex - 1) * pageSize)
                                                         .Take(pageSize);
+                    _cache.SetString($"Product_{pageIndex}_{pageSize}", JsonConvert.SerializeObject(_result.Data), cacheOptions);
+
+                }
+                else
+                {
+                    _result.Data = JsonConvert.DeserializeObject<List<Product>>(cachedData);
+                }
+
                 _result.IsSuccess = true;
                 _result.Message = "";
             }catch(Exception e)

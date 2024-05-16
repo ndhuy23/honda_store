@@ -34,6 +34,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.Configure<ProductAppDbSetting>(
     builder.Configuration.GetSection("ProductDatabase"));
+builder.Services.AddStackExchangeRedisCache(redisOptions =>
+{
+    redisOptions.Configuration = builder.Configuration.GetConnectionString("Redis");
+});
 builder.Services.AddTransient<IProductService, ProductServices>();
 builder.Services.AddTransient<ICategoryService, CategoryService>();
 builder.Services.AddTransient<IColorService, ColorService>();
